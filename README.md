@@ -1,7 +1,7 @@
 # FLIXGO - Movie Rental and Review Platform
 A web-based movie rental and management system built with Java Servlets and file handling (.txt files for data persistence).
 
-## 🎬 Features
+## Features
 
 ### User Features
 - User registration and authentication
@@ -19,7 +19,7 @@ A web-based movie rental and management system built with Java Servlets and file
 - Movie management (add/edit/delete movies)
 - View ticket sales income
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Backend:** Java Servlets
 - **Frontend:** HTML, CSS, JavaScript
@@ -28,7 +28,7 @@ A web-based movie rental and management system built with Java Servlets and file
 - **Data Structure:** Stack (for watched movie history)
 
 
-## ⚙️ Configuration - Important File Paths
+## Configuration - Important File Paths
 
 **Before running the project, you MUST update the following file paths according to your system:**
 
@@ -53,7 +53,7 @@ private static final String MOVIES_DIR = "C:/your-path/FLIXGO/videos/";
 ```
 Change this to your local directory path where movie video files are stored.
 
-## 📊 Data Structures & Algorithms
+## Data Structures & Algorithms
 
 ### Bubble Sort
 Used for sorting movies by rating in descending order.
@@ -69,14 +69,20 @@ Used to maintain user's watched movie history with LIFO (Last In, First Out) beh
 // Implementation in WatchedHistoryService
 ```
 
-## 🔐 Default Admin Credentials
+##  Default Admin Credentials
 
 ```
 Username: admin
 Password: admin123
 ```
+## Setup Instructions
+Prerequisites
 
-## 📱 Pages Overview
+Java JDK 8 or higher
+Apache Tomcat 9 (Download from https://tomcat.apache.org/download-90.cgi)
+IDE (IntelliJ IDEA, Eclipse, or NetBeans recommended)
+
+## Pages Overview
 
 | Page | Description |
 |------|-------------|
