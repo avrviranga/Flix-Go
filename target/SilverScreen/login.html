@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <title>FLIXGO - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            color: white;
+            background-color: #141414;
+        }
+
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            opacity: 75.0%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: #e50914;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-form {
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #333;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #e50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .login-button:hover {
+            background-color: #f40612;
+        }
+
+        .home-button {
+            width: 100%;
+            padding: 15px;
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .signup-link {
+            margin-top: 20px;
+            color: #737373;
+        }
+
+        .signup-link a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .admin-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .admin-button {
+            background-color: transparent;
+            color: #737373;
+            border: 1px solid #737373;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-button:hover {
+            color: white;
+            border-color: white;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+<!-- Background Video (same as homepage) -->
+<video autoplay muted loop id="video-background">
+    <source src="assets/Video/Trailer2 .mp4" type="video/mp4">
+</video>
+
+<!-- Dark overlay -->
+<div class="overlay"></div>
+
+<!-- Main content -->
+<div class="content">
+    <h1 class="logo">FLIXGO</h1>
+
+    <div class="login-form">
+        <h2>Sign In</h2>
+        <form action="login" method="POST">
+            <div class="form-group">
+                <label for="email">Email or phone number</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="login-button">Sign In</button>
+                <button type="button" class="home-button" onclick="window.location.href='index.html'">Back to Home</button>
+            </div>
+        </form>
+
+        <div class="signup-link">
+            <p>New to FLIXGO? <a href="register.html">Sign up now</a>.</p>
+        </div>
+
+        <div class="admin-link">
+            <a href="adminLogin.html"><button class="admin-button">Admin Login</button></a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Optional: Add animation for button hover effects
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.login-button, .home-button, .admin-button');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+</body>
+</html>
