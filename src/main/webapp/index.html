@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <title>FLIXGO - Movie Rental and Review Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            color: white;
+        }
+
+        #video-background {
+            position: fixed;
+            width: 120%; /* Increase width beyond viewport */
+            height: auto;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the video */
+            z-index: -1;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #e50914;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        .cta-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: #e50914;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 5px;
+        }
+
+        .cta-button:hover {
+            background-color: #f40612;
+            transform: scale(1.05);
+        }
+
+        .nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .nav a:hover {
+            color: #e50914;
+        }
+
+        /* Fallback if video doesn't load */
+        .no-video #video-background {
+            display: none;
+        }
+        .no-video .fallback-image {
+            display: block;
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            object-fit: cover;
+        }
+
+        /* About Section */
+        #about {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 80px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .about-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .about-title {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: #e50914;
+            text-align: center;
+        }
+
+        .about-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .about-features {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .feature-item {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .feature-icon {
+            color: #e50914;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            margin-top: 3px;
+        }
+
+        .feature-text h3 {
+            margin-bottom: 5px;
+            color: #e50914;
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-up {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #e50914;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .scroll-up.visible {
+            opacity: 1;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) translateX(-50%);
+            }
+            40% {
+                transform: translateY(-20px) translateX(-50%);
+            }
+            60% {
+                transform: translateY(-10px) translateX(-50%);
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+<!-- Background Video -->
+<video autoplay muted loop id="video-background">
+    <source src="assets/Video/Trailer.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+</video>
+
+<!-- Fallback image (hidden by default) -->
+<img src="assets/images/fallback.jpg" alt="FLIXGO Background" class="fallback-image" style="display: none;">
+
+<!-- Dark overlay -->
+<div class="overlay"></div>
+
+<!-- Main content -->
+<div class="content">
+    <div class="nav">
+        <a href="login.html">Login</a>
+        <a href="register.html">Register</a>
+        <a href="AllReviews.html">Reviews</a>
+        <a href="#about">About</a>
+    </div>
+
+    <h1 class="logo">FLIXGO</h1>
+    <p class="tagline">Your ultimate movie rental and review platform. Discover, rent, and review thousands of movies from classics to the latest releases.</p>
+    <a href="login.html" class="cta-button">Get Started</a>
+    <a href="#about" class="cta-button">Learn More</a>
+
+    <div class="scroll-down" onclick="document.getElementById('about').scrollIntoView({ behavior: 'smooth' })">
+        ↓
+    </div>
+</div>
+
+<!-- About Section -->
+<section id="about">
+    <div class="about-container">
+        <h2 class="about-title">About FLIXGO</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <p>Welcome to FLIXGO, your premier destination for movie rentals and reviews. We're passionate about film and dedicated to providing movie enthusiasts with a seamless platform to discover, rent, and review the latest blockbusters and timeless classics.</p>
+                <p>Founded in 2025, FLIXGO has quickly become a favorite among cinephiles for our extensive library, honest user reviews, and competitive rental prices. Our mission is to connect people with great films and foster a community where movie lovers can share their thoughts and recommendations.</p>
+                <p>Whether you're looking for the newest releases, hidden indie gems, or nostalgic favorites, FLIXGO has something for everyone. Our platform is designed to make your movie-watching experience as enjoyable and convenient as possible.</p>
+            </div>
+            <div class="about-features">
+                <div class="feature-item">
+                    <div class="feature-icon">🎬</div>
+                    <div class="feature-text">
+                        <h3>Extensive Library</h3>
+                        <p>Access thousands of movies across all genres, from Hollywood blockbusters to international cinema.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⭐</div>
+                    <div class="feature-text">
+                        <h3>Honest Reviews</h3>
+                        <p>Read and write reviews from a community of passionate movie fans just like you.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💸</div>
+                    <div class="feature-text">
+                        <h3>Affordable Rentals</h3>
+                        <p>Enjoy competitive pricing with no hidden fees and flexible rental periods.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-text">
+                        <h3>Multi-Device Access</h3>
+                        <p>Watch on any device, anywhere - your movies are always just a click away.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="register.html" class="cta-button">Join Now</a>
+    </div>
+</section>
+
+<div class="scroll-up" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">↑</div>
+
+<script>
+    // Check if video can play, if not show fallback
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('video-background');
+
+        video.play().catch(error => {
+            document.body.classList.add('no-video');
+            console.log("Video playback failed, using fallback image");
+        });
+
+        // Alternative check for mobile devices
+        if (video.readyState < 3) {
+            video.addEventListener('error', function() {
+                document.body.classList.add('no-video');
+            });
+        }
+
+        // Show/hide scroll-up button
+        window.addEventListener('scroll', function() {
+            const scrollUp = document.querySelector('.scroll-up');
+            if (window.pageYOffset > 300) {
+                scrollUp.classList.add('visible');
+            } else {
+                scrollUp.classList.remove('visible');
+            }
+        });
+    });
+</script>
+</body>
+</html>

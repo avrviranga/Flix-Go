@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLIXGO - User Dashboard</title>
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <link rel="stylesheet" href="css/UserDashboard.css">
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+    <a href="index.html" class="logo">FLIXGO</a>
+
+    <nav class="nav-links">
+        <a href="UserDashboard.html">Home</a>
+        <a href="movie.html">Movies</a>
+        <a href="Ticketpage.html">My Tickets</a>
+    </nav>
+
+    <div class="user-actions">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+    <h1 class="dashboard-title">My Account</h1>
+
+
+    <div class="dashboard-grid">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active">Account Details</a></li>
+                <li><a href="WatchedHistory.html">Watched History</a></li>
+                <li><a href="ReviewPage.html">My Reviews</a></li>
+                <li><a href="PaymentMethods.html">Payment Methods</a></li>
+                <li><a href="Ticketpage.html">Ticket</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="content-area">
+            <div class="success-message" id="successMessage"></div>
+            <div class="error-message" id="errorMessage"></div>
+
+            <h2 class="section-title">Account Details</h2>
+
+            <form class="account-form" id="accountForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                    <div class="field-error" id="fullNameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter your current password">
+                    <div class="field-error" id="currentPasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" placeholder="Enter a new password">
+                    <div class="field-error" id="newPasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your new password">
+                    <div class="field-error" id="confirmPasswordError"></div>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn" id="saveBtn">Save Changes</button>
+                </div>
+            </form>
+
+            <!-- Danger Zone Section -->
+            <div class="danger-zone">
+            <h3 class="danger-zone-title">Delete Account</h3>
+            <p class="danger-zone-description">Warning: This action cannot be undone. All your data will be permanently deleted.</p>
+            <button class="btn btn-danger" id="deleteAccountBtn">Delete My Account</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM Elements
+        const accountForm = document.getElementById('accountForm');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userAvatar = document.getElementById('userAvatar');
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+
+
+        // Load user data when page loads
+        loadUserData();
+
+
+        // Form submission handler
+        accountForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await updateUser();
+        });
+
+        // Cancel button handler
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            loadUserData();
+            clearMessages();
+            clearPasswordFields();
+        });
+
+        // Logout button handler
+        logoutBtn.addEventListener('click', function() {
+            logoutUser();
+        });
+
+        // Delete account button handler
+        deleteAccountBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                deleteAccount();
+            }
+        })
+
+        deleteAccountBtn.addEventListener('click', async function() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                try {
+                    const response = await fetch('delete-account', {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        window.location.href = 'login.html?deleted=true';
+                    } else {
+                        const data = await response.json();
+                        showError(data.error || 'Failed to delete account');
+                    }
+                } catch (error) {
+                    console.error('Error deleting account:', error);
+                    showError('Failed to delete account. Please try again.');
+                }
+            }
+        });
+
+        // Load user data from backend
+        async function loadUserData() {
+            try {
+                const response = await fetch('user-data', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include' // Important for session cookies
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+
+                const userData = await response.json();
+
+                // Populate form fields
+                document.getElementById('fullName').value = userData.fullName;
+                document.getElementById('email').value = userData.email;
+
+                // Set avatar initial
+                userAvatar.textContent = userData.fullName.charAt(0).toUpperCase();
+
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showError('Failed to load user data. Please try again.');
+                // Redirect to login if unauthorized
+                if (error.message.includes('Unauthorized')) {
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                }
+            }
+        }
+
+        // Update user data
+        async function updateUser() {
+            // Clear previous messages
+            clearMessages();
+            clearFieldErrors();
+
+            // Get form values
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate form
+            if (!fullName) {
+                showFieldError('fullNameError', 'Full name is required');
+                return;
+            }
+
+            if (newPassword && newPassword !== confirmPassword) {
+                showFieldError('confirmPasswordError', 'Passwords do not match');
+                return;
+            }
+
+            if (newPassword && !currentPassword) {
+                showFieldError('currentPasswordError', 'Current password is required to change password');
+                return;
+            }
+
+            try {
+                const response = await fetch('update-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        fullName: fullName,
+                        currentPassword: currentPassword,
+                        newPassword: newPassword
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Update failed');
+                }
+
+                const result = await response.json();
+                showSuccess(result.message || 'Profile updated successfully');
+
+                // Update avatar initial if name changed
+                userAvatar.textContent = fullName.charAt(0).toUpperCase();
+
+                // Clear password fields
+                clearPasswordFields();
+
+                // Reload user data to ensure consistency
+                loadUserData();
+
+            } catch (error) {
+                console.error('Error updating user:', error);
+                showError(error.message || 'Failed to update profile. Please try again.');
+
+                // Specific error handling for password mismatch
+                if (error.message.includes('Current password is incorrect')) {
+                    showFieldError('currentPasswordError', 'Current password is incorrect');
+                }
+            }
+        }
+
+        // Logout user
+        async function logoutUser() {
+            try {
+                const response = await fetch('logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    // Clear client-side data
+                    localStorage.clear();
+                    sessionStorage.clear();
+
+                    // Redirect to login with success state
+                    window.location.href = 'login.html?logout=success';
+                } else {
+                    throw new Error('Logout failed');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                showError('Logout failed. Please try again.');
+            }
+        }
+
+        // Delete account
+        async function deleteAccount() {
+            try {
+                const response = await fetch('delete-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete account');
+                }
+
+                // Clear client-side data
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Redirect to login with success state
+                window.location.href = 'login.html?accountDeleted=success';
+
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                showError(error.message || 'Failed to delete account. Please try again.');
+            }
+        }
+
+        // Helper functions
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showFieldError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function clearMessages() {
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-error').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        function clearPasswordFields() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+    });
+</script>
+</body>
+</html>

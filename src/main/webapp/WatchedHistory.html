@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLIXGO - Watched History</title>
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <link rel="stylesheet" href="css/UserDashboard.css">
+    <style>
+        /* Loading indicator styles */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #e50914;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .movie-card {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background-color: #222; /* Fallback background */
+        }
+
+        .movie-info {
+            padding: 15px;
+        }
+
+        .movie-title {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-year {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .recent-label {
+            color: #e50914;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+    <a href="index.html" class="logo">FLIXGO</a>
+
+    <nav class="nav-links">
+        <a href="UserDashboard.html">Home</a>
+        <a href="movie.html">Movies</a>
+        <a href="Ticketpage.html">My Tickets</a>
+    </nav>
+
+    <div class="user-actions">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+    <h1 class="dashboard-title">Watched History</h1>
+
+    <div class="dashboard-grid">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="UserDashboard.html">Account Details</a></li>
+                <li><a href="#" class="active">Watched History</a></li>
+                <li><a href="ReviewPage.html">My Reviews</a></li>
+                <li><a href="PaymentMethods.html">Payment Methods</a></li>
+                <li><a href="Ticketpage.html">Ticket</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="content-area">
+            <div class="success-message" id="successMessage"></div>
+            <div class="error-message" id="errorMessage"></div>
+
+            <h2 class="section-title">Recently Watched Movies</h2>
+            <p>Your most recently watched movies appear first</p>
+
+            <div id="watchedMoviesContainer">
+                <div class="empty-state hidden" id="emptyState">
+                    <p>You haven't watched any movies yet.</p>
+                    <br></br>
+                    <a href="movie.html" class="btn">Browse Movies</a>
+                </div>
+
+                <div class="loading-container" id="loadingIndicator">
+                    <div class="loading-spinner"></div>
+                </div>
+
+                <div class="movie-grid hidden" id="movieGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show loading indicator immediately
+        document.getElementById('loadingIndicator').classList.remove('hidden');
+
+        loadUserData(); // Load user data first
+        loadWatchedMovies();
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+    });
+
+    async function loadUserData() {
+        try {
+            const response = await fetch('user-data', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const userData = await response.json();
+            const userAvatar = document.getElementById('userAvatar');
+            userAvatar.textContent = userData.fullName.charAt(0).toUpperCase();
+
+            // Store user name in localStorage for consistency
+            localStorage.setItem('userName', userData.fullName);
+
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            // Fallback to localStorage if available
+            const userName = localStorage.getItem('userName') || 'U';
+            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
+        }
+    }
+
+    async function loadWatchedMovies() {
+        try {
+            const response = await fetch('/api/watched-movies', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const movies = await response.json();
+
+            // Hide loading indicator
+            document.getElementById('loadingIndicator').classList.add('hidden');
+
+            if (movies.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                return;
+            }
+
+            displayMovies(movies);
+        } catch (error) {
+            console.error('Error loading watched movies:', error);
+
+            // Hide loading indicator and show error
+            document.getElementById('loadingIndicator').classList.add('hidden');
+            showError('Failed to load watched movies. Please try again.');
+        }
+    }
+
+    function displayMovies(movies) {
+        const movieGrid = document.getElementById('movieGrid');
+        movieGrid.innerHTML = ''; // Clear previous content
+
+        // Preload all images before displaying
+        const imagePromises = movies.map(movie => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = movie.posterPath;
+                img.onload = () => resolve({...movie, imageLoaded: true});
+                img.onerror = () => resolve({
+                    ...movie,
+                    imageLoaded: false,
+                    posterPath: 'assets/movie-posters/default-poster.jpg'
+                });
+            });
+        });
+
+        Promise.all(imagePromises).then(processedMovies => {
+            processedMovies.forEach((movie, index) => {
+                const movieCard = document.createElement('div');
+                movieCard.className = 'movie-card';
+
+                movieCard.innerHTML = `
+                    <img src="${movie.posterPath}" alt="${movie.title}" class="movie-poster"
+                         onerror="this.src='assets/movie-posters/default-poster.jpg'">
+                    <div class="movie-info">
+                        <h3 class="movie-title">${movie.title}</h3>
+                        <p class="movie-year">${movie.year}</p>
+                        ${index === 0 ? '<p class="recent-label">Most Recent</p>' : ''}
+                    </div>
+                `;
+
+                movieCard.addEventListener('click', () => {
+                    window.location.href = `movie.html?movieId=${movie.id}`;
+                });
+
+                movieGrid.appendChild(movieCard);
+            });
+
+            // Show the grid only after all images are processed
+            movieGrid.classList.remove('hidden');
+        });
+    }
+
+    async function logoutUser() {
+        try {
+            const response = await fetch('logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                // Clear client-side data
+                localStorage.clear();
+                sessionStorage.clear();
+
+                window.location.href = 'login.html?logout=success';
+            } else {
+                throw new Error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            showError('Logout failed. Please try again.');
+        }
+    }
+
+    function showError(message) {
+        const errorElement = document.getElementById('errorMessage');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+        }, 5000);
+    }
+</script>
+</body>
+</html>

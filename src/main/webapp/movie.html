@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLIXGO - Movies</title>
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <link rel="stylesheet" href="css/UserDashboard.css">
+    <link rel="stylesheet" href="css/movie.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div>
+        <div class="spinner"></div>
+        <span id="loadingText">Checking access...</span>
+    </div>
+</div>
+
+<!-- Admin Badge -->
+<div class="admin-badge" id="adminBadge">Admin Mode</div>
+
+<!-- Header -->
+<header class="header">
+    <a href="index.html" class="logo">FLIXGO</a>
+    <nav class="nav-links">
+        <a href="UserDashboard.html" id="homeLink">Home</a>
+        <a href="movie.html" class="active">Movies</a>
+    </nav>
+    <div class="user-actions">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container" id="mainContent" style="display: none;">
+    <!-- Slideshow replacing Featured Show -->
+    <div class="slideshow-container" id="slideshowContainer">
+        <!-- Slides will be added by JavaScript -->
+        <div class="slideshow-nav" id="slideshowNav">
+            <!-- Dots will be added by JavaScript -->
+        </div>
+        <div class="slideshow-arrow prev" id="prevSlide">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="slideshow-arrow next" id="nextSlide">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-hero">
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by title, genre, or description..." autocomplete="off">
+                <button id="searchButton" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sort Options -->
+    <div class="sort-options">
+        <button id="sortByRatingBtn" class="sort-btn">
+            <i class="fas fa-sort-amount-down"></i> Sort by Rating
+        </button>
+        <button id="showOriginalOrderBtn" class="sort-btn">
+            <i class="fas fa-random"></i> Show Original Order
+        </button>
+    </div>
+
+
+    <!-- Movie Collection -->
+    <h2 class="section-header">
+        Movie Collection
+    </h2>
+    <div class="movies-container" id="moviesContainer">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</div>
+
+<!-- Movie Details Modal -->
+<div class="modal" id="movieDetailsModal">
+    <div class="modal-content large-modal">
+        <span class="close-btn">&times;</span>
+        <div class="modal-body">
+            <div class="modal-poster">
+                <img id="modalPoster" src="" alt="Movie Poster">
+            </div>
+            <div class="modal-info">
+                <h1 class="modal-movie-title" id="modalMovieTitle"></h1>
+                <div class="movie-meta">
+                    <span class="movie-year" id="modalMovieYear"></span>
+                    <span class="movie-rating" id="modalMovieRating"></span>
+                    <span class="movie-genre" id="modalMovieGenre"></span>
+                </div>
+                <p class="modal-movie-description" id="modalMovieDescription"></p>
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-primary" id="playMovieBtn">
+                        <i class="fas fa-play"></i> Play Movie
+                    </button>
+                    <button class="modal-btn modal-btn-secondary" id="playTrailerBtn">
+                        <i class="fas fa-film"></i> Play Trailer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Video Player Modal -->
+<div class="modal" id="videoPlayerModal">
+    <div class="modal-content fullscreen-modal">
+        <span class="close-btn">&times;</span>
+        <h2 id="videoTitle" class="video-title">Video Player</h2>
+        <div class="video-loading">
+            <div class="spinner"></div>
+        </div>
+        <div class="video-error" id="videoError">
+            <h3><i class="fas fa-exclamation-triangle"></i> Error playing video</h3>
+            <p id="errorMessage">Please try again later</p>
+            <button class="modal-btn modal-btn-primary" id="retryButton">
+                <i class="fas fa-redo"></i> Retry
+            </button>
+        </div>
+        <video id="videoPlayer" controls crossorigin="anonymous" playsinline>
+            <source src="" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM Elements
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        const mainContent = document.getElementById('mainContent');
+        const adminBadge = document.getElementById('adminBadge');
+        const homeLink = document.getElementById('homeLink');
+        const userAvatar = document.getElementById('userAvatar');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const moviesContainer = document.getElementById('moviesContainer');
+        const slideshowContainer = document.getElementById('slideshowContainer');
+        const slideshowNav = document.getElementById('slideshowNav');
+        const prevSlide = document.getElementById('prevSlide');
+        const nextSlide = document.getElementById('nextSlide');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const sortByRatingBtn = document.getElementById('sortByRatingBtn');
+        const showOriginalOrderBtn = document.getElementById('showOriginalOrderBtn');
+
+        // Modal elements
+        const movieDetailsModal = document.getElementById('movieDetailsModal');
+        const videoPlayerModal = document.getElementById('videoPlayerModal');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const modalMovieTitle = document.getElementById('modalMovieTitle');
+        const modalMovieYear = document.getElementById('modalMovieYear');
+        const modalMovieRating = document.getElementById('modalMovieRating');
+        const modalMovieGenre = document.getElementById('modalMovieGenre');
+        const modalMovieDescription = document.getElementById('modalMovieDescription');
+        const modalPoster = document.getElementById('modalPoster');
+        const playMovieBtn = document.getElementById('playMovieBtn');
+        const playTrailerBtn = document.getElementById('playTrailerBtn');
+        const videoError = document.getElementById('videoError');
+        const errorMessage = document.getElementById('errorMessage');
+        const retryButton = document.getElementById('retryButton');
+        const videoLoading = document.querySelector('.video-loading');
+        const videoTitle = document.getElementById('videoTitle');
+
+        // Slideshow images - paths relative to the webapp folder
+        const slideshowImages = [
+            'assets/Images/1.jpg',
+            'assets/Images/2.jpg',
+            'assets/Images/3.jpg',
+            'assets/Images/4.jpg',
+            'assets/Images/5.jpg'
+        ];
+
+        let currentSlide = 0;
+        let slideInterval;
+        let allMovies = []; // Store all movies for search functionality
+
+        // Initialize slideshow
+        function initSlideshow() {
+            // Create slides
+            slideshowImages.forEach((image, index) => {
+                const slide = document.createElement('div');
+                slide.className = `slideshow-slide ${index === 0 ? 'active' : ''}`;
+                slide.style.backgroundImage = `url('${image}')`;
+                slideshowContainer.appendChild(slide);
+
+                // Create navigation dots
+                const dot = document.createElement('div');
+                dot.className = `slideshow-dot ${index === 0 ? 'active' : ''}`;
+                dot.addEventListener('click', () => goToSlide(index));
+                slideshowNav.appendChild(dot);
+            });
+
+            // Start automatic slideshow
+            startSlideshow();
+
+            // Add event listeners for navigation
+            prevSlide.addEventListener('click', () => {
+                goToSlide(currentSlide - 1);
+                resetSlideInterval();
+            });
+
+            nextSlide.addEventListener('click', () => {
+                goToSlide(currentSlide + 1);
+                resetSlideInterval();
+            });
+        }
+
+        function startSlideshow() {
+            slideInterval = setInterval(() => {
+                goToSlide(currentSlide + 1);
+            }, 5000); // Change slide every 5 seconds
+        }
+
+        function resetSlideInterval() {
+            clearInterval(slideInterval);
+            startSlideshow();
+        }
+
+        function goToSlide(index) {
+            // Get all slides and dots
+            const slides = document.querySelectorAll('.slideshow-slide');
+            const dots = document.querySelectorAll('.slideshow-dot');
+
+            // Handle wrap-around
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
+
+            // Remove active class from current slide and dot
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+
+            // Set new current slide
+            currentSlide = index;
+
+            // Add active class to new slide and dot
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        // Close buttons
+        const closeButtons = document.querySelectorAll('.close-btn');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                movieDetailsModal.style.display = 'none';
+                videoPlayerModal.style.display = 'none';
+                videoPlayer.pause();
+                videoPlayer.src = '';
+            });
+        });
+
+        // Check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const adminAccess = urlParams.get('adminAccess') === 'true';
+
+        // Initialize admin mode if needed
+        if (adminAccess) {
+            initializeAdminMode();
+        } else {
+            initializeUserMode();
+        }
+
+        function initializeAdminMode() {
+            console.log('Initializing admin mode');
+            adminBadge.style.display = 'block';
+            homeLink.style.display = 'none';
+            userAvatar.textContent = 'A';
+
+            loadingOverlay.style.display = 'none';
+            mainContent.style.display = 'block';
+
+            // Initialize slideshow
+            initSlideshow();
+
+            // Load movies for admin
+            loadMovies();
+
+            logoutBtn.addEventListener('click', function() {
+                window.location.href = 'adminDashboard.html';
+            });
+        }
+
+        function initializeUserMode() {
+            console.log('Initializing user mode');
+            loadingText.textContent = "Loading your information...";
+
+            fetch('user-data', {
+                method: 'GET',
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch user data');
+                    return response.json();
+                })
+                .then(userData => {
+                    userAvatar.textContent = userData.fullName.charAt(0).toUpperCase();
+                    return checkTicketAccess(userData.email);
+                })
+                .then(() => {
+                    // Initialize slideshow
+                    initSlideshow();
+
+                    // Load movies after access is verified
+                    loadMovies();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    window.location.href = 'login.html';
+                });
+        }
+
+        function checkTicketAccess(email) {
+            loadingText.textContent = "Verifying your access...";
+
+            return fetch('purchase-ticket?email=' + encodeURIComponent(email), {
+                method: 'GET',
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        loadingOverlay.style.display = 'none';
+                        mainContent.style.display = 'block';
+                    } else if (response.status === 404) {
+                        window.location.href = 'Ticketpage.html';
+                    } else {
+                        throw new Error('Failed to verify ticket');
+                    }
+                });
+        }
+
+        // Load movies from backend sorted by rating by default
+        function loadMovies() {
+            fetch('/api/movies/sorted-by-rating')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch movies');
+                    return response.json();
+                })
+                .then(movies => {
+                    allMovies = movies; // Store all movies for search
+                    if (movies.length > 0) {
+                        renderMovies(movies);
+                        // Set the sort button as active
+                        sortByRatingBtn.classList.add('active');
+                        showOriginalOrderBtn.classList.remove('active');
+                    } else {
+                        moviesContainer.innerHTML = '<p>No movies available</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading movies:', error);
+                    moviesContainer.innerHTML = '<p>Error loading movies. Please try again later.</p>';
+                });
+        }
+
+        // Function to show original order
+        function loadOriginalOrder() {
+            fetch('/api/movies')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch movies');
+                    return response.json();
+                })
+                .then(movies => {
+                    allMovies = movies;
+                    renderMovies(movies);
+                    // Set the original order button as active
+                    showOriginalOrderBtn.classList.add('active');
+                    sortByRatingBtn.classList.remove('active');
+                })
+                .catch(error => {
+                    console.error('Error loading original order:', error);
+                    alert('Error loading original order. Please try again.');
+                });
+        }
+
+        // Sort movies by rating
+        sortByRatingBtn.addEventListener('click', function() {
+            fetch('/api/movies/sorted-by-rating')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch sorted movies');
+                    return response.json();
+                })
+                .then(sortedMovies => {
+                    allMovies = sortedMovies; // Update the stored movies
+                    renderMovies(sortedMovies);
+                    // Set the sort button as active
+                    sortByRatingBtn.classList.add('active');
+                    showOriginalOrderBtn.classList.remove('active');
+                })
+                .catch(error => {
+                    console.error('Error sorting movies:', error);
+                    alert('Error sorting movies. Please try again.');
+                });
+        });
+
+        // Show original order button event listener
+        showOriginalOrderBtn.addEventListener('click', function() {
+            loadOriginalOrder();
+        });
+
+        // Render movies in the grid
+        function renderMovies(movies) {
+            moviesContainer.innerHTML = movies.map(movie => `
+                <div class="movie-card" data-id="${movie.id}">
+                    <img src="${getPosterUrl(movie)}" alt="${movie.title}" class="movie-poster">
+                    <div class="movie-title">${movie.title}</div>
+                    <div class="movie-rating">${movie.rating}/10</div>
+                </div>
+            `).join('');
+
+            // Add click event to movie cards
+            document.querySelectorAll('.movie-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const movieId = this.getAttribute('data-id');
+                    showMovieDetails(movieId);
+                });
+            });
+        }
+
+        // Show movie details in modal
+        function showMovieDetails(movieId) {
+            fetch(`/api/movies/${movieId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Movie not found');
+                    return response.json();
+                })
+                .then(movie => {
+                    // Update modal content with movie details
+                    modalMovieTitle.textContent = movie.title;
+                    modalMovieTitle.setAttribute('data-id', movie.id);
+                    modalMovieYear.textContent = movie.year;
+                    modalMovieRating.textContent = `${movie.rating}/10`;
+                    modalMovieGenre.textContent = movie.genre;
+                    modalMovieDescription.textContent = movie.description;
+                    modalPoster.src = getPosterUrl(movie);
+
+                    // Set up play buttons
+                    playMovieBtn.onclick = function() {
+                        playVideo(movie.filePath, movie.title);
+                    };
+
+                    playTrailerBtn.onclick = function() {
+                        if (movie.trailerPath) {
+                            playVideo(movie.trailerPath, `${movie.title} - Trailer`);
+                        } else {
+                            showErrorModal('No trailer available for this movie');
+                        }
+                    };
+
+                    // Show modal
+                    movieDetailsModal.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading movie details:', error);
+                    showErrorModal('Error loading movie details. Please try again.');
+                });
+        }
+
+        // Updated playVideo function
+        function playVideo(filePath, title = 'Video') {
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoError = document.getElementById('videoError');
+            const videoLoading = document.querySelector('.video-loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const videoTitle = document.getElementById('videoTitle');
+            const videoPlayerModal = document.getElementById('videoPlayerModal');
+
+            // Reset player state
+            videoPlayer.style.display = 'none';
+            videoError.style.display = 'none';
+            videoLoading.style.display = 'flex';
+            videoTitle.textContent = title;
+            videoPlayerModal.style.display = 'block';
+
+            // Extract filename and handle spaces
+            let filename = filePath.split(/[\\/]/).pop();
+            let encodedFilename = encodeURIComponent(filename);
+            let videoPath = '/videos/' + encodedFilename;
+
+            console.log('Attempting to play video:', videoPath);
+
+            // Clear previous handlers to avoid multiple events
+            videoPlayer.oncanplay = null;
+            videoPlayer.onerror = null;
+            videoPlayer.onwaiting = null;
+            videoPlayer.onstalled = null;
+            videoPlayer.onprogress = null;
+            videoPlayer.onplaying = null;
+            videoPlayer.onpause = null;
+
+            // Set up video player
+            videoPlayer.src = videoPath;
+            videoPlayer.load();
+
+            // Set playback progress tracking
+            let lastPlayPosition = 0;
+            let stuckTimeout = null;
+
+            // Track playback progress
+            videoPlayer.addEventListener('timeupdate', function() {
+                lastPlayPosition = videoPlayer.currentTime;
+
+                // Clear any stuck timeout when the playback is progressing
+                if (stuckTimeout) {
+                    clearTimeout(stuckTimeout);
+                    stuckTimeout = null;
+                }
+            });
+
+            // Handle playback stalling
+            videoPlayer.addEventListener('waiting', function() {
+                console.log('Video waiting for data...');
+
+                // Set a timeout to detect if playback is stuck
+                if (!stuckTimeout) {
+                    stuckTimeout = setTimeout(() => {
+                        console.log('Playback seems stuck, attempting to recover...');
+
+                        // Save current position
+                        const currentPos = videoPlayer.currentTime;
+
+                        // Attempt to recover by reloading and seeking
+                        videoPlayer.load();
+                        videoPlayer.currentTime = currentPos;
+                        videoPlayer.play().catch(e => {
+                            console.error('Recovery play failed:', e);
+                        });
+                    }, 5000);  // Wait 5 seconds before attempting recovery
+                }
+            });
+
+            // Event handlers
+            videoPlayer.oncanplay = function() {
+                videoLoading.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                videoPlayer.play().catch(e => {
+                    console.error('Auto-play failed:', e);
+                    // User interaction might be required for autoplay
+                    showVideoError('Click the play button to start video');
+                });
+            };
+
+            videoPlayer.onerror = function() {
+                let errorMsg = "Video playback failed. ";
+                switch(videoPlayer.error.code) {
+                    case 1: errorMsg += "Playback was aborted"; break;
+                    case 2: errorMsg += "Network error occurred"; break;
+                    case 3: errorMsg += "Video decoding failed"; break;
+                    case 4:
+                        errorMsg += "Video format not supported";
+                        console.error('Unsupported format details:', {
+                            src: videoPlayer.currentSrc,
+                            supported: videoPlayer.canPlayType('video/mp4')
+                        });
+                        break;
+                    default: errorMsg += "Unknown error occurred";
+                }
+                console.error('Video error:', videoPlayer.error);
+                showVideoError(errorMsg);
+            };
+
+            // Handle stalled playback
+            videoPlayer.onstalled = function() {
+                console.log('Video playback stalled');
+            };
+
+            // Monitor download progress
+            videoPlayer.onprogress = function() {
+                const buffered = videoPlayer.buffered;
+                if (buffered.length > 0) {
+                    const bufferedEnd = buffered.end(buffered.length - 1);
+                    const duration = videoPlayer.duration;
+                    console.log(`Video buffered: ${(bufferedEnd / duration * 100).toFixed(2)}%`);
+                }
+            };
+
+            // Timeout if loading takes too long
+            const timeout = setTimeout(() => {
+                if (videoLoading.style.display === 'flex') {
+                    showVideoError('Video loading timed out. Please try again.');
+                }
+            }, 20000); // Increase timeout to 20 seconds
+
+            // Record watched movie when playback starts
+            videoPlayer.onplaying = function() {
+                clearTimeout(timeout);
+                console.log('Video playback started');
+
+                // Get the movie ID from the modal
+                const movieId = document.getElementById('modalMovieTitle').getAttribute('data-id');
+                if (movieId) {
+                    recordWatchedMovie(movieId);
+                }
+            };
+
+            // Handle browsers that don't support automatic playback
+            videoPlayer.onloadedmetadata = function() {
+                if (videoLoading.style.display === 'flex') {
+                    videoLoading.style.display = 'none';
+                    videoPlayer.style.display = 'block';
+                }
+            };
+        }
+
+        function showVideoError(message) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoLoading = document.querySelector('.video-loading');
+            const videoError = document.getElementById('videoError');
+            const errorMessage = document.getElementById('errorMessage');
+
+            videoLoading.style.display = 'none';
+            videoPlayer.style.display = 'none';
+            videoError.style.display = 'block';
+            errorMessage.textContent = message;
+        }
+
+        function showErrorModal(message) {
+            alert(message); // Replace with a prettier modal if desired
+        }
+
+        // Helper function to get poster URL
+        function getPosterUrl(movie) {
+            // First try to get from base64 storage
+            const posterStorage = localStorage.getItem('moviePosters');
+            if (posterStorage) {
+                const posters = JSON.parse(posterStorage);
+                if (posters[movie.id]) {
+                    return posters[movie.id];
+                }
+            }
+
+            // Fallback to posterPath
+            if (movie.posterPath && (movie.posterPath.startsWith('http') || movie.posterPath.startsWith('/'))) {
+                return movie.posterPath;
+            }
+
+            // For local file paths, extract just the filename
+            if (movie.posterPath) {
+                let filename;
+                if (movie.posterPath.includes('\\')) {
+                    filename = movie.posterPath.split('\\').pop();
+                } else if (movie.posterPath.includes('/')) {
+                    filename = movie.posterPath.split('/').pop();
+                } else {
+                    filename = movie.posterPath;
+                }
+                return '/images/' + filename;
+            }
+
+            // Default poster
+            return 'img/default-movie.jpg';
+        }
+
+        // Set up user logout if not in admin mode
+        if (!adminAccess) {
+            logoutBtn.addEventListener('click', function() {
+                fetch('logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                })
+                    .then(() => {
+                        window.location.href = 'login.html?logout=success';
+                    })
+                    .catch(error => {
+                        console.error('Logout failed:', error);
+                        alert('Logout failed. Please try again.');
+                    });
+            });
+        }
+
+        // Retry button functionality
+        retryButton.addEventListener('click', function() {
+            if (videoPlayer.src) {
+                videoLoading.style.display = 'flex';
+                videoError.style.display = 'none';
+                videoPlayer.load();
+                videoPlayer.play().catch(e => {
+                    showVideoError('Playback failed. Please try again.');
+                });
+            }
+        });
+
+        // Call this function when movie starts playing
+        async function recordWatchedMovie(movieId) {
+            try {
+                const response = await fetch('/api/watched-movies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `movieId=${encodeURIComponent(movieId)}`,
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to record watched movie');
+                }
+            } catch (error) {
+                console.error('Error recording watched movie:', error);
+            }
+        }
+
+        // Search functionality
+        function filterMovies(searchTerm) {
+            if (!searchTerm) {
+                renderMovies(allMovies);
+                return;
+            }
+
+            const filteredMovies = allMovies.filter(movie =>
+                movie.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (movie.genre && movie.genre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (movie.description && movie.description.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+
+            if (filteredMovies.length > 0) {
+                renderMovies(filteredMovies);
+            } else {
+                moviesContainer.innerHTML = '<p>No movies found matching your search</p>';
+            }
+        }
+
+        // Event listeners for search
+        searchButton.addEventListener('click', () => {
+            filterMovies(searchInput.value.trim());
+        });
+
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                filterMovies(searchInput.value.trim());
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

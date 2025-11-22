@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLIXGO - Sign Up</title>
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            color: white;
+        }
+
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            opacity: 50.0%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #e50914;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .signup-form {
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            background: #333;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .signup-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #e50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .signup-button:hover {
+            background-color: #f40612;
+        }
+
+        .login-link {
+            margin-top: 20px;
+            color: #737373;
+        }
+
+        .login-link a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Fallback if video doesn't load */
+        .no-video #video-background {
+            display: none;
+        }
+
+        .no-video .fallback-image {
+            display: block;
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<!-- Background Video -->
+<video autoplay muted loop id="video-background">
+    <source src="assets/Video/Trailer3.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+</video>
+
+<!-- Dark overlay -->
+<div class="overlay"></div>
+
+<!-- Fallback image (hidden by default) -->
+<img src="assets/images/fallback.jpg" alt="FLIXGO Background" class="fallback-image" style="display: none;">
+
+<!-- Main content -->
+<div class="content">
+    <h1 class="logo">FLIXGO</h1>
+
+    <div class="signup-form">
+        <h2>Create Account</h2>
+        <form action="register" method="POST" id="signupForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" minlength="8" required>
+                <small style="color: #aaa;">Password must be at least 8 characters.</small>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center;">
+                <input type="checkbox" id="terms" name="terms" required style="margin-right: 10px;">
+                <label for="terms" style="margin: 0;">I agree to the <a href="#" style="color: #e50914;">Terms & Conditions</a></label>
+            </div>
+            <button type="submit" class="signup-button">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+            <p>Already have an account? <a href="login.html">Sign in now</a>.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('video-background');
+
+        video.play().catch(error => {
+            document.body.classList.add('no-video');
+            console.log("Video playback failed, using fallback image");
+        });
+
+        if (video.readyState < 3) {
+            video.addEventListener('error', function() {
+                document.body.classList.add('no-video');
+            });
+        }
+
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm-password');
+        const signupForm = document.getElementById('signupForm');
+        const termsCheckbox = document.getElementById('terms');
+
+        function validatePassword() {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity("Passwords don't match");
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        }
+
+        password.onchange = validatePassword;
+        confirmPassword.onkeyup = validatePassword;
+
+        signupForm.addEventListener('submit', function (e) {
+            if (!termsCheckbox.checked) {
+                alert("You must agree to the Terms & Conditions.");
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLIXGO - Admin Dashboard</title>
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <link rel="stylesheet" href="css/AdminStyle.css">
+
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+    <a href="adminDashboard.html" class="logo">FLIXGO ADMIN</a>
+
+    <div class="admin-actions">
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+    <h1 class="dashboard-title">Admin Dashboard</h1>
+
+    <div class="dashboard-grid">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" data-section="dashboard">Dashboard Overview</a></li>
+                <li><a href="#" data-section="users">User Management</a></li>
+                <li><a href="#" data-section="admins">Admin Management</a></li>
+                <li><a href="movieManagement.html">Movie Management</a></li>
+                <li><a href="movie.html?adminAccess=true">Movies</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="content-area">
+            <!-- Dashboard Overview Section -->
+            <div id="dashboard-section" class="content-section active">
+                <!-- Stats Cards -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="totalUsers">Loading...</div>
+                        <div class="stat-label">FlixGo Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Admins</div>
+                        <div class="stat-value" id="totalAdmins">Loading...</div>
+                        <div class="stat-label">System Administrators</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ticket Sales Income</div>
+                        <div class="stat-value" id="ticketIncome">Rs.24,580</div>
+                        <div class="stat-label">+$2,450 this week</div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <h2 class="section-title">Welcome to the FlixGo Admin Panel</h2>
+                <p>Use this section to add new admin users who can help manage the FlixGo movie rental and review platform. Admins have special access to manage movies, users, and platform settings to ensure a smooth and engaging experience for all users.</p>
+            </div>
+
+            <!-- User Management Section -->
+            <div id="users-section" class="content-section">
+                <h2 class="section-title">Registered Users</h2>
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                    <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+
+                <!-- Quick Actions -->
+                <h2 class="section-title">Quick Actions</h2>
+                <div style="display: flex; gap: 15px; margin-bottom: 2rem;">
+                    <button class="btn" onclick="showAddUserForm()">Add New User</button>
+                </div>
+
+                <!-- Add User Form (Hidden by default) -->
+                <div id="addUserForm" style="display: none;">
+                    <h3 class="section-title">Add New User</h3>
+                    <form class="admin-form">
+                        <div class="form-group">
+                            <label for="newUsername">Username</label>
+                            <input type="text" id="newUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserEmail">Email</label>
+                            <input type="email" id="newUserEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserPassword">Password</label>
+                            <input type="password" id="newUserPassword" required>
+                        </div>
+                        <div>
+                            <button type="button" class="btn" onclick="addNewUser()">Create User</button>
+                            <button type="button" class="btn" style="background-color: #666; margin-left: 10px;" onclick="hideAddUserForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Admin Management Section -->
+            <div id="admins-section" class="content-section">
+                <h2 class="section-title">Administrators</h2>
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Admin Name</th>
+                        <th>Role</th>
+                        <th>Login</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="adminsTableBody">
+                    <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+
+                <!-- Quick Actions -->
+                <h2 class="section-title">Quick Actions</h2>
+                <div style="display: flex; gap: 15px; margin-bottom: 2rem;">
+                    <button class="btn" onclick="showAddAdminForm()">Add New Admin</button>
+                </div>
+
+                <!-- Add Admin Form (Hidden by default) -->
+                <div id="addAdminForm" style="display: none;">
+                    <h3 class="section-title">Add New Administrator</h3>
+                    <form class="admin-form">
+                        <div class="form-group">
+                            <label for="adminUsername">Admin Username</label>
+                            <input type="text" id="adminUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPassword">Password</label>
+                            <input type="password" id="adminPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminRole">Role</label>
+                            <select id="adminRole">
+                                <option value="admin">Admin</option>
+                                <!--<option value="superadmin">Super Admin</option>-->
+                            </select>
+                        </div>
+                        <div>
+                            <button type="button" class="btn" onclick="addNewAdmin()">Create Admin</button>
+                            <button type="button" class="btn" style="background-color: #666; margin-left: 10px;" onclick="hideAddAdminForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Edit Admin Form (Hidden by default) -->
+                <div id="editAdminForm" style="display: none;">
+                    <h3 class="section-title">Edit Administrator</h3>
+                    <form class="admin-form">
+                        <input type="hidden" id="editAdminOriginalUsername">
+                        <div class="form-group">
+                            <label for="editAdminUsername">Admin Username</label>
+                            <input type="text" id="editAdminUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAdminPassword">Password (leave blank to keep current)</label>
+                            <input type="password" id="editAdminPassword">
+                        </div>
+                        <div class="form-group">
+                            <label for="editAdminRole">Role</label>
+                            <select id="editAdminRole">
+                                <option value="admin">Admin</option>
+                                <option value="superadmin">Super Admin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="button" class="btn" onclick="updateAdmin()">Update Admin</button>
+                            <button type="button" class="btn" style="background-color: #666; margin-left: 10px;" onclick="hideEditAdminForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Existing event listeners
+        document.getElementById('logoutBtn').addEventListener('click', logoutAdmin);
+        setupSidebarNavigation();
+
+        // Load dashboard data
+        fetchDashboardData();
+
+        // Load users and admins data when the page loads
+        fetchUsers();
+        fetchAdmins();
+
+        // Setup event delegation for user actions (edit/delete)
+        document.getElementById('usersTableBody').addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-btn')) {
+                const row = e.target.closest('tr');
+                const email = row.getAttribute('data-email');
+                deleteUser(email, row);
+            }
+        });
+    });
+
+    function setupSidebarNavigation() {
+        const menuItems = document.querySelectorAll('.sidebar-menu a');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Check if the link is an external page link (like movieManagement.html)
+                if (this.getAttribute('href') && this.getAttribute('href') !== '#') {
+                    // Let the default link behavior happen (navigate to the page)
+                    return;
+                }
+
+                // Otherwise handle the section switching within the page
+                e.preventDefault();
+
+                // Remove active class from all items
+                menuItems.forEach(i => i.classList.remove('active'));
+
+                // Add active class to clicked item
+                this.classList.add('active');
+
+                // Hide all sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Show the selected section
+                const sectionId = this.getAttribute('data-section') + '-section';
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+    }
+
+    // Function to fetch and display registered users
+    function fetchUsers() {
+        // Clear any sample data
+        const tableBody = document.getElementById('usersTableBody');
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading users...</td></tr>';
+
+        // Fetch users from the server using fetch API
+        fetch('/get-all-users', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include' // Include cookies for session authentication
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch users');
+                }
+                return response.json();
+            })
+            .then(users => {
+                displayUsers(users);
+                updateUserCount(users.length);
+            })
+            .catch(error => {
+                console.error('Error fetching users:', error);
+                tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #e74c3c;">
+                                Error loading users. Please try again.</td></tr>`;
+            });
+    }
+
+    // Function to display users in the table
+    function displayUsers(users) {
+        const tableBody = document.getElementById('usersTableBody');
+        tableBody.innerHTML = '';
+
+        if (users.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users found</td></tr>';
+            return;
+        }
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-email', user.email);
+
+            row.innerHTML = `
+                <td>${user.fullName}</td>
+                <td>${user.email}</td>
+                <td><span class="role-badge role-user">User</span></td>
+                <td>
+                    <button class="action-btn delete-btn">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Function to add a new user
+    function addNewUser() {
+        const fullName = document.getElementById('newUsername').value.trim();
+        const email = document.getElementById('newUserEmail').value.trim();
+        const password = document.getElementById('newUserPassword').value;
+
+        // Basic validation
+        if (!fullName || !email || !password) {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        // Email validation
+        if (!validateEmail(email)) {
+            alert("Please enter a valid email address");
+            return;
+        }
+
+        // Password validation (minimum 8 characters)
+        if (password.length < 8) {
+            alert("Password must be at least 8 characters long");
+            return;
+        }
+
+        // Create user object
+        const userData = {
+            fullName: fullName,
+            email: email,
+            password: password
+        };
+
+        // Send request to the server
+        fetch('/admin-add-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 409) {
+                        throw new Error('Email already exists');
+                    }
+                    throw new Error('Failed to add user');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Add the new user to the table
+                const tableBody = document.getElementById('usersTableBody');
+
+                // Remove "No users found" row if it exists
+                if (tableBody.innerHTML.includes('No users found')) {
+                    tableBody.innerHTML = '';
+                }
+
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-email', email);
+
+                newRow.innerHTML = `
+                <td>${fullName}</td>
+                <td>${email}</td>
+                <td><span class="role-badge role-user">User</span></td>
+                <td>
+                    <button class="action-btn delete-btn">Delete</button>
+                </td>
+            `;
+                tableBody.appendChild(newRow);
+
+                // Update stats
+                updateUserCount(1, true);
+
+                // Reset form and hide it
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newUserEmail').value = '';
+                document.getElementById('newUserPassword').value = '';
+                hideAddUserForm();
+
+                // Show success message
+                alert("User added successfully!");
+            })
+            .catch(error => {
+                console.error('Error adding user:', error);
+                alert(error.message || "Failed to add user. Please try again.");
+            });
+    }
+
+    // Function to delete a user
+    function deleteUser(email, row) {
+        if (!confirm(`Are you sure you want to delete the user with email ${email}?`)) {
+            return;
+        }
+
+        fetch('/admin-delete-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ email: email })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete user');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Remove the row from the table
+                row.remove();
+
+                // Update stats
+                updateUserCount(-1, true);
+
+                // If no more users, show "No users found" message
+                const tableBody = document.getElementById('usersTableBody');
+                if (tableBody.children.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users found</td></tr>';
+                }
+
+                // Show success message
+                alert("User deleted successfully!");
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+                alert("Failed to delete user. Please try again.");
+            });
+    }
+
+    // Helper function to update user count
+    function updateUserCount(count, increment = false) {
+        const totalUsersElement = document.getElementById('totalUsers');
+        let currentCount = parseInt(totalUsersElement.textContent.replace(/,/g, '')) || 0;
+
+        if (increment) {
+            currentCount += count;
+        } else {
+            currentCount = count;
+        }
+
+        totalUsersElement.textContent = currentCount.toLocaleString();
+    }
+
+    // Helper function to validate email
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    // Admin Management Functions
+    function fetchAdmins() {
+        const tableBody = document.getElementById('adminsTableBody');
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading admins...</td></tr>';
+
+        fetch('/get-all-admins', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch admins');
+                }
+                return response.json();
+            })
+            .then(admins => {
+                displayAdmins(admins);
+                updateAdminCount(admins.length);
+            })
+            .catch(error => {
+                console.error('Error fetching admins:', error);
+                tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #e74c3c;">
+                                Error loading admins. Please try again.</td></tr>`;
+            });
+    }
+
+    function displayAdmins(admins) {
+        const tableBody = document.getElementById('adminsTableBody');
+        tableBody.innerHTML = '';
+
+        if (admins.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No admins found</td></tr>';
+            return;
+        }
+
+        admins.forEach(admin => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-username', admin.username);
+
+            const roleBadgeClass = admin.role === 'superadmin' ? 'role-superadmin' : 'role-admin';
+            const roleDisplay = admin.role === 'superadmin' ? 'Super Admin' : 'Admin';
+
+            row.innerHTML = `
+                <td>${admin.username}</td>
+                <td><span class="role-badge ${roleBadgeClass}">${roleDisplay}</span></td>
+                <td>${admin.lastLogin || 'Secure login'}</td>
+                <td>
+                    <button class="action-btn edit-btn" onclick="showEditAdminForm('${admin.username}', '${admin.role}')">Edit</button>
+                    <button class="action-btn delete-btn" onclick="deleteAdmin('${admin.username}', this)">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function addNewAdmin() {
+        const username = document.getElementById('adminUsername').value.trim();
+        const password = document.getElementById('adminPassword').value;
+        const role = document.getElementById('adminRole').value;
+
+        if (!username || !password) {
+            alert("Please fill in all required fields");
+            return;
+        }
+
+        const adminData = {
+            username: username,
+            password: password,
+            role: role
+        };
+
+        fetch('/admin-add-admin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(adminData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 409) {
+                        throw new Error('Username already exists');
+                    }
+                    throw new Error('Failed to add admin');
+                }
+                return response.json();
+            })
+            .then(data => {
+                fetchAdmins(); // Refresh the admin list
+                hideAddAdminForm();
+                alert("Admin added successfully!");
+            })
+            .catch(error => {
+                console.error('Error adding admin:', error);
+                alert(error.message || "Failed to add admin. Please try again.");
+            });
+    }
+
+    function showAddAdminForm() {
+        document.getElementById('addAdminForm').style.display = 'block';
+    }
+
+    function hideAddAdminForm() {
+        document.getElementById('addAdminForm').style.display = 'none';
+    }
+
+    function showEditAdminForm(username, role) {
+        document.getElementById('editAdminOriginalUsername').value = username;
+        document.getElementById('editAdminUsername').value = username;
+        document.getElementById('editAdminRole').value = role;
+        document.getElementById('editAdminPassword').value = '';
+        document.getElementById('editAdminForm').style.display = 'block';
+    }
+
+    function hideEditAdminForm() {
+        document.getElementById('editAdminForm').style.display = 'none';
+    }
+
+    function updateAdmin() {
+        const originalUsername = document.getElementById('editAdminOriginalUsername').value;
+        const username = document.getElementById('editAdminUsername').value.trim();
+        const password = document.getElementById('editAdminPassword').value;
+        const role = document.getElementById('editAdminRole').value;
+
+        if (!username) {
+            alert("Username is required");
+            return;
+        }
+
+        const adminData = {
+            originalUsername: originalUsername,
+            username: username,
+            password: password || null, // Send null if password is empty
+            role: role
+        };
+
+        fetch('/admin-update-admin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(adminData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 409) {
+                        throw new Error('Username already exists');
+                    }
+                    throw new Error('Failed to update admin');
+                }
+                return response.json();
+            })
+            .then(data => {
+                fetchAdmins(); // Refresh the admin list
+                hideEditAdminForm();
+                alert("Admin updated successfully!");
+            })
+            .catch(error => {
+                console.error('Error updating admin:', error);
+                alert(error.message || "Failed to update admin. Please try again.");
+            });
+    }
+
+    function deleteAdmin(username, button) {
+        if (!confirm(`Are you sure you want to delete admin ${username}?`)) {
+            return;
+        }
+
+        fetch('/admin-delete-admin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ username: username })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete admin');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const row = button.closest('tr');
+                row.remove();
+                updateAdminCount(-1, true);
+                alert("Admin deleted successfully!");
+            })
+            .catch(error => {
+                console.error('Error deleting admin:', error);
+                alert("Failed to delete admin. Please try again.");
+            });
+    }
+
+    function updateAdminCount(count, increment = false) {
+        const totalAdminsElement = document.getElementById('totalAdmins');
+        let currentCount = parseInt(totalAdminsElement.textContent.replace(/,/g, '')) || 0;
+
+        if (increment) {
+            currentCount += count;
+        } else {
+            currentCount = count;
+        }
+
+        totalAdminsElement.textContent = currentCount.toLocaleString();
+    }
+
+    function fetchDashboardData() {
+        // Fetch actual user count from the server
+        fetch('/get-user-count', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user count');
+                }
+                return response.json();
+            })
+            .then(userData => {
+                document.getElementById('totalUsers').textContent = userData.userCount.toLocaleString();
+
+                // Fetch admin count
+                return fetch('/get-admin-count', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch admin count');
+                }
+                return response.json();
+            })
+            .then(adminData => {
+                document.getElementById('totalAdmins').textContent = adminData.adminCount.toLocaleString();
+
+                // Fetch ticket sales data
+                return fetch('/get-ticket-sales', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch ticket sales');
+                }
+                return response.json();
+            })
+            .then(salesData => {
+                // Format the total sales as currency
+                const totalSales = salesData.totalSales.toFixed(2);
+                const weeklySales = salesData.weeklySales.toFixed(2);
+
+                // Update the ticket income display
+                document.getElementById('ticketIncome').textContent = `Rs.${totalSales}`;
+
+                // Update the weekly sales display (the smaller text under the main figure)
+                const ticketIncomeElement = document.getElementById('ticketIncome');
+                const parentElement = ticketIncomeElement.parentElement;
+                const weeklyDisplay = parentElement.querySelector('.stat-label:last-child');
+
+                if (weeklyDisplay) {
+                    weeklyDisplay.textContent = `+ Rs.${weeklySales} this week`;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching dashboard data:', error);
+                document.getElementById('totalUsers').textContent = "0";
+                document.getElementById('totalAdmins').textContent = "0";
+                document.getElementById('ticketIncome').textContent = "$0.00";
+            });
+    }
+
+    function showAddUserForm() {
+        document.getElementById('addUserForm').style.display = 'block';
+    }
+
+    function hideAddUserForm() {
+        document.getElementById('addUserForm').style.display = 'none';
+    }
+
+    function logoutAdmin() {
+        if (confirm("Are you sure you want to logout?")) {
+            fetch('/admin-logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = 'adminLogin.html';
+                    } else {
+                        throw new Error('Logout failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    alert('Logout failed. Please try again.');
+                });
+        }
+    }
+</script>
+</body>
+</html>
