@@ -94,16 +94,8 @@ Password: admin123
 | `movieManagement.html` | Admin movie CRUD |
 | `AllReviews.html` | Public reviews page |
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ##  Acknowledgments
 
-- Built as a university/college project
+- Built as a university project
 - Uses file handling for data persistence instead of a database
 - Demonstrates practical use of data structures (Stack) and algorithms (Bubble Sort)
